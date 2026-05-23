@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>รายงานอุบัติเหตุจราจร</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--sf:#f7f8fa;--sf2:#eef0f5;
+  --ac:#d32b08;--ac2:#f05a28;
+  --gr:#16a34a;--yw:#d97706;--bl:#2563eb;--rd:#dc2626;
+  --tx:#0f1623;--mu:#6b7a99;
+  --br:rgba(0,0,0,0.09);--br2:rgba(0,0,0,0.14)
+}
+html{min-height:100%;background:#e8eaf0}
+body{
+  min-height:100vh;background:#e8eaf0;
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:24px 0 48px;
+  font-family:'Sarabun',Arial,'Noto Sans Thai',sans-serif;
+  -webkit-font-smoothing:antialiased
+}
+@media(max-width:430px){
+  body{padding:0;background:#fff}
+  .phone{width:100%!important;border-radius:0!important;box-shadow:none!important;border:none!important;min-height:100vh}
+}
+.phone{
+  width:390px;min-height:820px;background:var(--bg);
+  border-radius:40px;border:1px solid rgba(0,0,0,0.12);
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 12px 48px rgba(0,0,0,0.15)
+}
+.sbar{padding:14px 22px 8px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--tx);background:var(--bg);flex-shrink:0}
+.screen{display:none;flex-direction:column;flex:1;min-height:0}
+.screen.active{display:flex}
+.hdr{background:#fff;padding:14px 20px 15px;border-bottom:1px solid var(--br2);flex-shrink:0}
+.hdr-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.badge{color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px;background:var(--ac);flex-shrink:0}
+.bg{background:var(--gr)!important}.bb{background:var(--bl)!important}.by{background:var(--yw)!important}.br_{background:var(--rd)!important}
+.htitle{color:var(--tx);font-size:15px;font-weight:700}
+.loc{display:flex;align-items:center;gap:7px;color:var(--mu);font-size:12px}
+.gdot{width:7px;height:7px;background:var(--gr);border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.chips{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.chip{background:var(--sf);border:1px solid var(--br2);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--mu)}
+.chip b{color:var(--tx);font-weight:700}
+.prog{padding:11px 20px 0;background:var(--bg);flex-shrink:0}
+.dots{display:flex;gap:4px;margin-bottom:4px}
+.dot{flex:1;height:3px;border-radius:2px;background:var(--sf2);transition:background .3s}
+.dot.done{background:var(--ac)}.dot.act{background:var(--ac2)}
+.slbl{font-size:11px;color:var(--mu);padding-bottom:11px}
+.body{flex:1;overflow-y:auto;padding:15px 20px;-webkit-overflow-scrolling:touch}
+.body::-webkit-scrollbar{display:none}
+.sec{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;margin-top:4px}
+.card{background:var(--sf);border:1px solid var(--br2);border-radius:13px;padding:14px 15px;margin-bottom:12px}
+.foot{padding:12px 20px 28px;background:var(--bg);border-top:1px solid var(--br2);flex-shrink:0}
+.bp{width:100%;background:var(--ac);color:#fff;border:none;border-radius:13px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;transition:opacity .15s,transform .1s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+.bp:active{transform:scale(.98);opacity:.9}
+.bsend{background:linear-gradient(130deg,#b02206,#d32b08,#f05a28);font-size:16px}
+.bs{width:100%;background:transparent;color:var(--mu);border:1px solid var(--br2);border-radius:13px;padding:13px;font-size:13px;cursor:pointer;margin-top:8px;min-height:48px;font-family:inherit;transition:background .2s}
+.bs:active{background:var(--sf)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}
+.pcell{aspect-ratio:1;border-radius:9px;background:var(--sf);border:1.5px dashed var(--br2);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mu);font-size:10px;cursor:pointer;overflow:hidden;position:relative;min-height:88px}
+.pcell.filled{border-style:solid;border-color:var(--br2)}
+.pcell svg{width:100%;height:100%}
+.pbadge{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.45);border-radius:4px;padding:1px 5px;font-size:9px;color:#fff}
+.wauto{font-size:10px;color:var(--gr);font-weight:700;margin-bottom:8px}
+.wmain{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.wico{font-size:40px;line-height:1}
+.wtmp{font-size:32px;font-weight:300;color:var(--tx);line-height:1}
+.wlbl{font-size:14px;color:var(--mu);margin-top:3px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.wi{background:var(--sf2);border-radius:8px;padding:8px 10px}
+.wil{font-size:10px;color:var(--mu);margin-bottom:2px}
+.wiv{font-size:13px;font-weight:600;color:var(--tx)}
+.erow{display:flex;gap:8px;margin-top:12px}
+select,input[type=number]{background:#fff;border:1px solid var(--br2);border-radius:8px;color:var(--tx);font-size:13px;padding:9px 10px;-webkit-appearance:none;appearance:none;font-family:inherit}
+select{flex:1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7a99' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.oframe{width:100%;aspect-ratio:2.8;background:var(--sf2);border-radius:10px;border:2px dashed rgba(211,43,8,.35);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;margin-bottom:11px;position:relative;overflow:hidden;cursor:pointer;min-height:100px}
+.sline{position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--ac2),transparent);animation:scan 2s ease-in-out infinite;top:0}
+@keyframes scan{0%{top:10%}50%{top:85%}100%{top:10%}}
+.pres{background:var(--sf);border:2px solid var(--gr);border-radius:9px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.pnum{font-size:16px;font-weight:700;color:var(--tx);letter-spacing:2px}
+.trow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+.tag{background:var(--sf);border:1px solid var(--br2);border-radius:7px;padding:7px 12px;font-size:12px;color:var(--mu);cursor:pointer;transition:all .2s;font-family:inherit}
+.tag.sel{background:rgba(211,43,8,.07);border-color:var(--ac);color:var(--ac);font-weight:700}
+.icard{background:var(--sf);border:1px solid var(--br2);border-radius:12px;padding:14px;margin-bottom:10px}
+.ihdr{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.inum{width:32px;height:32px;background:var(--ac);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.ibtn{background:#fff;border:1px solid var(--br2);border-radius:8px;padding:9px 6px;font-size:12px;color:var(--mu);cursor:pointer;text-align:center;transition:all .2s;font-family:inherit}
+.ibtn.sr{background:rgba(220,38,38,.07);border-color:var(--rd);color:var(--rd);font-weight:700}
+.ibtn.sy{background:rgba(217,119,6,.07);border-color:var(--yw);color:var(--yw);font-weight:700}
+.addp{width:100%;background:transparent;border:1.5px dashed var(--br2);border-radius:10px;color:var(--mu);padding:12px;font-size:13px;cursor:pointer;min-height:48px;font-family:inherit}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.rbtn{background:var(--sf);border:1px solid var(--br2);border-radius:9px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.rbtn.sel{background:rgba(37,99,235,.07);border-color:var(--bl)}
+.ri{font-size:22px;display:block;margin-bottom:5px}
+.rl{font-size:11px;color:var(--mu)}
+.rbtn.sel .rl{color:var(--bl);font-weight:700}
+.srow{margin-bottom:13px}
+.slrow{display:flex;justify-content:space-between;font-size:12px;color:var(--mu);margin-bottom:6px}
+.slrow b{color:var(--tx);font-weight:700}
+input[type=range]{width:100%;height:4px;border-radius:2px;background:var(--sf2);-webkit-appearance:none;appearance:none;border:none;padding:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--ac);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--ac);border:none;cursor:pointer}
+.crow{display:flex;gap:10px;align-items:center;margin-bottom:13px}
+.cbtn{width:46px;height:46px;background:var(--sf);border:1px solid var(--br2);border-radius:9px;color:var(--tx);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cr_{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--br);font-size:12px}
+.cr_:last-child{border-bottom:none}
+.ck{color:var(--mu);flex-shrink:0;margin-right:10px}
+.cv_{color:var(--tx);font-weight:600;text-align:right}
+.box{border-radius:9px;padding:10px 12px;font-size:11px;display:flex;gap:8px;align-items:flex-start;margin-bottom:11px;line-height:1.65}
+.bi{background:rgba(211,43,8,.05);border:1px solid rgba(211,43,8,.18);color:#8b2000}
+.bok{background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.22);color:#145a30}
+.bw{background:rgba(217,119,6,.05);border:1px solid rgba(217,119,6,.22);color:#7c4a00}
+.apirow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gr);font-weight:700;margin-bottom:9px}
+.adot{width:6px;height:6px;background:var(--gr);border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0}
+.okwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:36px 24px;text-align:center}
+.okico{width:80px;height:80px;background:rgba(22,163,74,.10);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);font-size:40px}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.rno{background:var(--sf);border:1px solid var(--br2);border-radius:10px;padding:13px 20px;margin-top:15px;width:100%;text-align:center}
+.rno small{font-size:11px;color:var(--mu)}
+.rno strong{color:var(--tx);font-size:18px;display:block;margin-top:4px;letter-spacing:2px}
+.slist{background:var(--sf);border:1px solid var(--br2);border-radius:10px;padding:12px 16px;margin-top:13px;width:100%}
+.sr_{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:var(--mu);border-bottom:1px solid var(--br)}
+.sr_:last-child{border-bottom:none}
+.srok{color:var(--gr);font-weight:700}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="sbar"><span>14:01</span><span>&#128246; &#128267;</span></div>
+
+  <!-- S1 -->
+  <div class="screen active" id="s1">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge">REPORT</span><span class="htitle">&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;&#3629;&#3640;&#3610;&#3633;&#3605;&#3636;&#3648;&#3627;&#3605;&#3640;&#3592;&#3619;&#3634;&#3592;&#3619;</span></div>
+      <div class="loc"><div class="gdot"></div><span>&#3626;&#3606;&#3634;&#3609;&#3637;&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614; &#8213; &#3619;&#3633;&#3610; GPS &#3649;&#3621;&#3657;&#3623;</span></div>
+      <div class="chips">
+        <div class="chip">&#128197; <b>1 &#3617;.&#3588;. 2569</b></div>
+        <div class="chip">&#128337; <b>14:01</b></div>
+      </div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot act"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 1/7 &#8213; &#3619;&#3641;&#3611;&#3616;&#3634;&#3614;&#3607;&#3637;&#3656;&#3648;&#3585;&#3636;&#3604;&#3648;&#3627;&#3605;&#3640;</div>
+    </div>
+    <div class="body">
+      <div class="sec">&#3619;&#3641;&#3611;&#3616;&#3634;&#3614;&#3607;&#3637;&#3656;&#3648;&#3585;&#3636;&#3604;&#3648;&#3627;&#3605;&#3640; (&#3626;&#3641;&#3591;&#3626;&#3640;&#3604; 12 &#3619;&#3641;&#3611;)</div>
+      <div class="pgrid">
+        <div class="pcell filled">
+          <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="300" height="300" fill="#d0d5dd"/>
+            <rect x="0" y="160" width="300" height="140" fill="#9aa5b4"/>
+            <rect x="0" y="150" width="300" height="18" fill="#6b7a8d"/>
+            <rect x="118" y="150" width="64" height="18" fill="#f7c948"/>
+            <rect x="28" y="104" width="102" height="56" rx="8" fill="#c0392b"/>
+            <rect x="36" y="89" width="72" height="30" rx="4" fill="#e74c3c"/>
+            <circle cx="54" cy="162" r="14" fill="#2c3e50"/><circle cx="54" cy="162" r="8" fill="#95a5a6"/>
+            <circle cx="106" cy="162" r="14" fill="#2c3e50"/><circle cx="106" cy="162" r="8" fill="#95a5a6"/>
+            <rect x="164" y="107" width="102" height="53" rx="8" fill="#2980b9"/>
+            <rect x="174" y="92" width="70" height="29" rx="4" fill="#3498db"/>
+            <circle cx="182" cy="162" r="14" fill="#2c3e50"/><circle cx="182" cy="162" r="8" fill="#95a5a6"/>
+            <circle cx="248" cy="162" r="14" fill="#2c3e50"/><circle cx="248" cy="162" r="8" fill="#95a5a6"/>
+            <line x1="130" y1="118" x2="164" y2="127" stroke="#f39c12" stroke-width="5"/>
+            <line x1="132" y1="132" x2="162" y2="116" stroke="#f39c12" stroke-width="3"/>
+            <polygon points="150,38 128,76 172,76" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
+            <text x="150" y="68" text-anchor="middle" font-size="24" fill="#7f5200" font-family="sans-serif">!</text>
+            <rect x="0" y="175" width="48" height="6" rx="3" fill="#fff" opacity="0.6"/>
+            <rect x="78" y="175" width="48" height="6" rx="3" fill="#fff" opacity="0.6"/>
+            <rect x="158" y="175" width="48" height="6" rx="3" fill="#fff" opacity="0.6"/>
+            <rect x="238" y="175" width="48" height="6" rx="3" fill="#fff" opacity="0.6"/>
+          </svg>
+          <div class="pbadge">1/12</div>
+        </div>
+        <div class="pcell" onclick="addPhoto(this)"><div style="font-size:22px;margin-bottom:3px">+</div><div>&#3648;&#3614;&#3636;&#3656;&#3617;</div></div>
+        <div class="pcell" onclick="addPhoto(this)"><div style="font-size:22px;margin-bottom:3px">+</div><div>&#3648;&#3614;&#3636;&#3656;&#3617;</div></div>
+        <div class="pcell" onclick="addPhoto(this)"><div style="font-size:22px;margin-bottom:3px">+</div><div>&#3648;&#3614;&#3636;&#3656;&#3617;</div></div>
+        <div class="pcell" onclick="addPhoto(this)"><div style="font-size:22px;margin-bottom:3px">+</div><div>&#3648;&#3614;&#3636;&#3656;&#3617;</div></div>
+        <div class="pcell" onclick="addPhoto(this)"><div style="font-size:22px;margin-bottom:3px">+</div><div>&#3648;&#3614;&#3636;&#3656;&#3617;</div></div>
+      </div>
+      <div class="box bi"><span style="font-size:16px;flex-shrink:0">&#128190;</span><span>&#3610;&#3633;&#3609;&#3607;&#3638;&#3585;&#3629;&#3633;&#3605;&#3650;&#3609;&#3617;&#3633;&#3605;&#3636;&#3649;&#3617;&#3657;&#3652;&#3617;&#3656;&#3617;&#3637;&#3626;&#3633;&#3597;&#3597;&#3634;&#3603; &#3592;&#3632;&#3629;&#3633;&#3611;&#3650;&#3627;&#3621;&#3604;&#3648;&#3617;&#3639;&#3656;&#3629;&#3648;&#3594;&#3639;&#3656;&#3629;&#3617;&#3605;&#3656;&#3629;&#3629;&#3636;&#3609;&#3648;&#3607;&#3629;&#3619;&#3660;&#3648;&#3609;&#3655;&#3605;&#3652;&#3604;&#3657;</span></div>
+    </div>
+    <div class="foot"><button class="bp" onclick="go(2)">&#3606;&#3633;&#3604;&#3652;&#3611; &#8213; &#3626;&#3616;&#3634;&#3614;&#3629;&#3634;&#3585;&#3634;&#3624; &#8594;</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="screen" id="s2">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge bb">WEATHER</span><span class="htitle">&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3626;&#3616;&#3634;&#3614;&#3629;&#3634;&#3585;&#3634;&#3624;</span></div>
+      <div class="loc"><div class="gdot"></div><span>&#3626;&#3606;&#3634;&#3609;&#3637;&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614; &#8213; 1 &#3617;.&#3588;. 2569 14:01</span></div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot act"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 2/7 &#8213; &#3626;&#3616;&#3634;&#3614;&#3629;&#3634;&#3585;&#3634;&#3624; (&#3648;&#3594;&#3639;&#3656;&#3629;&#3617;&#3605;&#3656;&#3629; API)</div>
+    </div>
+    <div class="body">
+      <div class="apirow"><div class="adot"></div>&#3648;&#3594;&#3639;&#3656;&#3629;&#3617;&#3605;&#3656;&#3629; OpenWeatherMap API &#3649;&#3621;&#3657;&#3623;</div>
+      <div class="card">
+        <div class="wauto">&#9729; &#3604;&#3638;&#3591;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3592;&#3634;&#3585;&#3585;&#3619;&#3617;&#3629;&#3640;&#3605;&#3640;&#3609;&#3636;&#3618;&#3617;&#3623;&#3636;&#3607;&#3618;&#3634; / OpenWeatherMap</div>
+        <div class="wmain">
+          <div class="wico" id="wico">&#127783;&#65039;</div>
+          <div><div class="wtmp" id="wtmp">10&#176;C</div><div class="wlbl" id="wlbl">&#3615;&#3609;&#3605;&#3585;</div></div>
+        </div>
+        <div class="wgrid">
+          <div class="wi"><div class="wil">&#3588;&#3623;&#3634;&#3617;&#3594;&#3639;&#3657;&#3609;</div><div class="wiv">78%</div></div>
+          <div class="wi"><div class="wil">&#3607;&#3633;&#3624;&#3609;&#3623;&#3636;&#3626;&#3633;&#3618;</div><div class="wiv">300&#3617;.</div></div>
+          <div class="wi"><div class="wil">&#3588;&#3623;&#3634;&#3617;&#3648;&#3619;&#3655;&#3623;&#3621;&#3617;</div><div class="wiv">8 &#3617;./&#3623;&#3636;.</div></div>
+          <div class="wi"><div class="wil">&#3588;&#3623;&#3634;&#3617;&#3585;&#3604;&#3629;&#3634;&#3585;&#3634;&#3624;</div><div class="wiv">1008 hPa</div></div>
+          <div class="wi"><div class="wil">&#3614;&#3619;&#3632;&#3629;&#3634;&#3607;&#3636;&#3605;&#3618;&#3660;&#3586;&#3638;&#3657;&#3609;</div><div class="wiv">06:51</div></div>
+          <div class="wi"><div class="wil">&#3614;&#3619;&#3632;&#3629;&#3634;&#3607;&#3636;&#3605;&#3618;&#3660;&#3605;&#3585;</div><div class="wiv">18:20</div></div>
+        </div>
+        <div style="border-top:1px solid var(--br);margin-top:12px;padding-top:12px">
+          <div class="sec" style="margin-bottom:8px">&#3649;&#3585;&#3657;&#3652;&#3586;&#3604;&#3657;&#3623;&#3618;&#3605;&#3609;&#3648;&#3629;&#3591;</div>
+          <div class="erow">
+            <select id="wsel" onchange="chgW()">
+              <option value="&#3615;&#3609;&#3605;&#3585;" selected>&#127783;&#65039; &#3615;&#3609;&#3605;&#3585;</option>
+              <option value="&#3649;&#3604;&#3604;&#3592;&#3633;&#3604;">&#9728;&#65039; &#3649;&#3604;&#3604;&#3592;&#3633;&#3604;</option>
+              <option value="&#3617;&#3637;&#3648;&#3617;&#3636;&#3609;">&#9729;&#65039; &#3617;&#3637;&#3648;&#3617;&#3636;&#3609;</option>
+              <option value="&#3627;&#3636;&#3617;&#3632;">&#10052;&#65039; &#3627;&#3636;&#3617;&#3632;</option>
+              <option value="&#3627;&#3617;&#3629;&#3585;">&#127787;&#65039; &#3627;&#3617;&#3629;&#3585;</option>
+              <option value="&#3621;&#3617;&#3649;&#3619;&#3591;">&#128168; &#3621;&#3617;&#3649;&#3619;&#3591;</option>
+            </select>
+            <input type="number" id="tinp" value="10" style="width:78px" onchange="chgT()" placeholder="&#176;C">
+          </div>
+        </div>
+      </div>
+      <div class="sec">&#3626;&#3616;&#3634;&#3614;&#3606;&#3609;&#3609;</div>
+      <div class="trow">
+        <button class="tag" onclick="togTag(this)">&#3649;&#3627;&#3657;&#3591;</button>
+        <button class="tag sel" onclick="togTag(this)">&#3648;&#3611;&#3637;&#3618;&#3585; / &#3617;&#3637;&#3609;&#3657;&#3635;&#3586;&#3633;&#3591;</button>
+        <button class="tag" onclick="togTag(this)">&#3609;&#3657;&#3635;&#3649;&#3586;&#3655;&#3591;</button>
+        <button class="tag" onclick="togTag(this)">&#3627;&#3636;&#3617;&#3632;</button>
+        <button class="tag" onclick="togTag(this)">&#3604;&#3636;&#3609;&#3650;&#3588;&#3621;&#3609;</button>
+        <button class="tag" onclick="togTag(this)">&#3585;&#3656;&#3629;&#3626;&#3619;&#3657;&#3634;&#3591;</button>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="bp" onclick="go(3)">&#3606;&#3633;&#3604;&#3652;&#3611; &#8213; OCR &#3618;&#3634;&#3609;&#3614;&#3634;&#3627;&#3609;&#3632; &#8594;</button>
+      <button class="bs" onclick="go(1)">&#8592; &#3618;&#3657;&#3629;&#3609;&#3585;&#3621;&#3633;&#3610;</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="screen" id="s3">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge by">OCR</span><span class="htitle">&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3618;&#3634;&#3609;&#3614;&#3634;&#3627;&#3609;&#3632; &#8213; OCR</span></div>
+      <div class="loc" style="color:var(--yw)">&#128247; &#3626;&#3649;&#3585;&#3609;&#3611;&#3657;&#3634;&#3618;&#3607;&#3632;&#3648;&#3610;&#3637;&#3618;&#3609;&#3604;&#3657;&#3623;&#3618;&#3585;&#3621;&#3657;&#3629;&#3591;</div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot act"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 3/7 &#8213; OCR &#3611;&#3657;&#3634;&#3618;&#3607;&#3632;&#3648;&#3610;&#3637;&#3618;&#3609;</div>
+    </div>
+    <div class="body">
+      <div class="sec">&#3626;&#3649;&#3585;&#3609;&#3611;&#3657;&#3634;&#3618;&#3607;&#3632;&#3648;&#3610;&#3637;&#3618;&#3609;</div>
+      <div class="oframe" onclick="simOCR()" id="oframe">
+        <div class="sline"></div>
+        <div id="ohint" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1">
+          <div style="font-size:30px">&#128269;</div>
+          <div style="font-size:12px;color:var(--mu)">&#3649;&#3605;&#3632;&#3648;&#3614;&#3639;&#3656;&#3629;&#3648;&#3619;&#3636;&#3656;&#3617;&#3626;&#3649;&#3585;&#3609;</div>
+        </div>
+      </div>
+      <div id="ores" style="display:none">
+        <div class="box bok"><span style="font-size:16px;flex-shrink:0">&#9989;</span><span>&#3629;&#3656;&#3634;&#3609; OCR &#3626;&#3635;&#3648;&#3619;&#3655;&#3592; &#8213; &#3588;&#3623;&#3634;&#3617;&#3609;&#3656;&#3634;&#3648;&#3594;&#3639;&#3656;&#3629;&#3606;&#3639;&#3629; 97.3%</span></div>
+        <div class="sec">&#3611;&#3657;&#3634;&#3618;&#3607;&#3632;&#3648;&#3610;&#3637;&#3618;&#3609;</div>
+        <div class="pres">
+          <div><div style="font-size:10px;color:var(--mu);margin-bottom:4px">&#3612;&#3621;&#3585;&#3634;&#3619;&#3629;&#3656;&#3634;&#3609;</div><div class="pnum">&#3585;&#3607; 1234 &#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;</div></div>
+          <div style="font-size:10px;color:var(--gr);text-align:center"><div style="font-size:20px">&#9989;</div>97.3%</div>
+        </div>
+        <div class="sec">&#3651;&#3610;&#3629;&#3609;&#3640;&#3597;&#3634;&#3605;&#3586;&#3633;&#3610;&#3586;&#3637;&#3656; / &#3610;&#3633;&#3605;&#3619;&#3611;&#3619;&#3632;&#3594;&#3634;&#3594;&#3609;</div>
+        <div class="pres" style="border-color:rgba(37,99,235,.45)">
+          <div><div style="font-size:10px;color:var(--mu);margin-bottom:4px">&#3648;&#3621;&#3586;&#3651;&#3610;&#3586;&#3633;&#3610;&#3586;&#3637;&#3656;</div><div style="font-size:14px;font-weight:700;color:var(--tx);letter-spacing:2px">12-3456-78901</div></div>
+          <div style="font-size:10px;color:var(--bl);text-align:center"><div style="font-size:20px">&#9989;</div>99.1%</div>
+        </div>
+      </div>
+      <div class="sec">&#3611;&#3619;&#3632;&#3648;&#3616;&#3607;&#3618;&#3634;&#3609;&#3614;&#3634;&#3627;&#3609;&#3632;</div>
+      <div class="trow">
+        <button class="tag sel" onclick="togTag(this)">&#3619;&#3606;&#3618;&#3609;&#3605;&#3660;</button>
+        <button class="tag" onclick="togTag(this)">&#3619;&#3606;&#3585;&#3619;&#3632;&#3610;&#3632;</button>
+        <button class="tag" onclick="togTag(this)">&#3619;&#3606;&#3610;&#3619;&#3619;&#3607;&#3640;&#3585;</button>
+        <button class="tag" onclick="togTag(this)">&#3619;&#3606;&#3650;&#3604;&#3618;&#3626;&#3634;&#3619;</button>
+        <button class="tag" onclick="togTag(this)">&#3617;&#3629;&#3648;&#3605;&#3629;&#3619;&#3660;&#3652;&#3595;&#3588;&#3660;</button>
+        <button class="tag" onclick="togTag(this)">&#3592;&#3633;&#3585;&#3619;&#3618;&#3634;&#3609;</button>
+        <button class="tag" onclick="togTag(this)">&#3588;&#3609;&#3648;&#3604;&#3636;&#3609;&#3648;&#3607;&#3657;&#3634;</button>
+      </div>
+      <div class="sec">&#3592;&#3635;&#3609;&#3623;&#3609;&#3618;&#3634;&#3609;&#3614;&#3634;&#3627;&#3609;&#3632;&#3607;&#3637;&#3656;&#3648;&#3585;&#3637;&#3656;&#3618;&#3623;&#3586;&#3657;&#3629;&#3591;</div>
+      <div class="crow">
+        <button class="cbtn" onclick="adjCar(-1)">&#8722;</button>
+        <span style="font-size:26px;font-weight:700;color:var(--tx);min-width:38px;text-align:center" id="carcount">2</span>
+        <button class="cbtn" onclick="adjCar(1)">+</button>
+        <span style="font-size:13px;color:var(--mu)">&#3588;&#3633;&#3609;</span>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="bp" onclick="go(4)">&#3606;&#3633;&#3604;&#3652;&#3611; &#8213; &#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610; &#8594;</button>
+      <button class="bs" onclick="go(2)">&#8592; &#3618;&#3657;&#3629;&#3609;&#3585;&#3621;&#3633;&#3610;</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="screen" id="s4">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge br_">INJURED</span><span class="htitle">&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;</span></div>
+      <div class="loc" style="color:var(--ac);font-size:11px">&#9888;&#65039; &#3585;&#3619;&#3629;&#3585;&#3648;&#3600;&#3614;&#3634;&#3632;&#3585;&#3619;&#3603;&#3637;&#3607;&#3637;&#3656;&#3617;&#3637;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;&#3648;&#3607;&#3656;&#3634;&#3609;&#3633;&#3657;&#3609;</div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot act"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 4/7 &#8213; &#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;</div>
+    </div>
+    <div class="body">
+      <div id="injlist">
+        <div class="icard">
+          <div class="ihdr"><div class="inum">1</div><span style="font-size:13px;color:var(--tx);font-weight:700">&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610; #1</span></div>
+          <div class="sec" style="margin-bottom:7px">&#3619;&#3632;&#3604;&#3633;&#3610;&#3585;&#3634;&#3619;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;</div>
+          <div class="igrid">
+            <button class="ibtn sr" onclick="togInj(this,'r')">&#3626;&#3634;&#3627;&#3633;&#3626;</button>
+            <button class="ibtn" onclick="togInj(this,'r')">&#3611;&#3634;&#3609;&#3585;&#3621;&#3634;&#3591;</button>
+            <button class="ibtn" onclick="togInj(this,'r')">&#3648;&#3621;&#3655;&#3585;&#3609;&#3657;&#3629;&#3618;</button>
+            <button class="ibtn" onclick="togInj(this,'r')">&#3652;&#3617;&#3656;&#3607;&#3619;&#3634;&#3610;</button>
+          </div>
+          <div class="sec" style="margin-bottom:7px">&#3611;&#3619;&#3632;&#3648;&#3616;&#3607;&#3612;&#3641;&#3657;&#3648;&#3585;&#3637;&#3656;&#3618;&#3623;&#3586;&#3657;&#3629;&#3591;</div>
+          <div class="trow">
+            <button class="tag sel" onclick="togTag(this)">&#3612;&#3641;&#3657;&#3586;&#3633;&#3610;&#3586;&#3637;&#3656;</button>
+            <button class="tag" onclick="togTag(this)">&#3612;&#3641;&#3657;&#3650;&#3604;&#3618;&#3626;&#3634;&#3619;</button>
+            <button class="tag" onclick="togTag(this)">&#3588;&#3609;&#3648;&#3604;&#3636;&#3609;&#3648;&#3607;&#3657;&#3634;</button>
+            <button class="tag" onclick="togTag(this)">&#3592;&#3633;&#3585;&#3619;&#3618;&#3634;&#3609;</button>
+          </div>
+          <div class="sec" style="margin-bottom:7px">&#3585;&#3634;&#3619;&#3626;&#3656;&#3591;&#3605;&#3633;&#3623;&#3607;&#3634;&#3591;&#3585;&#3634;&#3619;&#3649;&#3614;&#3607;&#3618;&#3660;</div>
+          <div style="display:flex;gap:7px">
+            <button class="ibtn sy" style="flex:1" onclick="togInj(this,'y')">&#3626;&#3656;&#3591; &#3619;&#3614;. &#3649;&#3621;&#3657;&#3623;</button>
+            <button class="ibtn" style="flex:1" onclick="togInj(this,'y')">&#3648;&#3604;&#3636;&#3609;&#3652;&#3604;&#3657;&#3648;&#3629;&#3591;</button>
+            <button class="ibtn" style="flex:1" onclick="togInj(this,'y')">&#3652;&#3617;&#3656;&#3607;&#3619;&#3634;&#3610;</button>
+          </div>
+        </div>
+      </div>
+      <button class="addp" onclick="addPerson()">+ &#3648;&#3614;&#3636;&#3656;&#3617;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;</button>
+      <div style="margin-top:10px"></div>
+      <div class="box bok"><span style="font-size:16px;flex-shrink:0">&#128657;</span><span>&#3627;&#3634;&#3585;&#3617;&#3637;&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;&#3626;&#3634;&#3627;&#3633;&#3626; &#3585;&#3619;&#3640;&#3603;&#3634;&#3650;&#3607;&#3619; 1669 &#3585;&#3656;&#3629;&#3609;&#3604;&#3635;&#3648;&#3609;&#3636;&#3609;&#3585;&#3634;&#3619;&#3605;&#3656;&#3629;</span></div>
+    </div>
+    <div class="foot">
+      <button class="bp" onclick="go(5)">&#3606;&#3633;&#3604;&#3652;&#3611; &#8213; &#3614;&#3634;&#3619;&#3634;&#3617;&#3636;&#3648;&#3605;&#3629;&#3619;&#3660;&#3606;&#3609;&#3609; &#8594;</button>
+      <button class="bs" onclick="go(3)">&#8592; &#3618;&#3657;&#3629;&#3609;&#3585;&#3621;&#3633;&#3610;</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="screen" id="s5">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge bb">ROAD</span><span class="htitle">&#3614;&#3634;&#3619;&#3634;&#3617;&#3636;&#3648;&#3605;&#3629;&#3619;&#3660;&#3606;&#3609;&#3609;</span></div>
+      <div class="loc">&#128506; &#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3592;&#3634;&#3585; Open Street Map</div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot act"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 5/7 &#8213; &#3614;&#3634;&#3619;&#3634;&#3617;&#3636;&#3648;&#3605;&#3629;&#3619;&#3660;&#3606;&#3609;&#3609;</div>
+    </div>
+    <div class="body">
+      <div class="sec">&#3611;&#3619;&#3632;&#3648;&#3616;&#3607;&#3606;&#3609;&#3609;</div>
+      <div class="rgrid">
+        <div class="rbtn sel" onclick="togRoad(this)"><span class="ri">&#128739;</span><span class="rl">&#3606;&#3609;&#3609;&#3607;&#3633;&#3656;&#3623;&#3652;&#3611;</span></div>
+        <div class="rbtn" onclick="togRoad(this)"><span class="ri">&#128679;</span><span class="rl">&#3607;&#3634;&#3591;&#3604;&#3656;&#3623;&#3609;</span></div>
+        <div class="rbtn" onclick="togRoad(this)"><span class="ri">&#127753;</span><span class="rl">&#3626;&#3632;&#3614;&#3634;&#3609;</span></div>
+        <div class="rbtn sel" onclick="togRoad(this)"><span class="ri">&#10010;</span><span class="rl">&#3607;&#3634;&#3591;&#3649;&#3618;&#3585;</span></div>
+        <div class="rbtn" onclick="togRoad(this)"><span class="ri">&#8617;</span><span class="rl">&#3650;&#3588;&#3657;&#3591;</span></div>
+        <div class="rbtn" onclick="togRoad(this)"><span class="ri">&#128274;</span><span class="rl">&#3585;&#3656;&#3629;&#3626;&#3619;&#3657;&#3634;&#3591;</span></div>
+      </div>
+      <div class="sec">&#3588;&#3623;&#3634;&#3617;&#3648;&#3619;&#3655;&#3623;&#3592;&#3635;&#3585;&#3633;&#3604;</div>
+      <div class="srow">
+        <div class="slrow"><span>&#3588;&#3623;&#3634;&#3617;&#3648;&#3619;&#3655;&#3623;&#3592;&#3635;&#3585;&#3633;&#3604;</span><b id="spv">60 &#3585;&#3617;./&#3594;&#3617;.</b></div>
+        <input type="range" min="0" max="120" step="10" value="60" oninput="document.getElementById('spv').textContent=this.value+' &#3585;&#3617;./&#3594;&#3617;.'">
+      </div>
+      <div class="sec">&#3592;&#3635;&#3609;&#3623;&#3609;&#3594;&#3656;&#3629;&#3591;&#3607;&#3634;&#3591; (&#3605;&#3656;&#3629;&#3604;&#3657;&#3634;&#3609;)</div>
+      <div class="srow">
+        <div class="slrow"><span>&#3592;&#3635;&#3609;&#3623;&#3609;&#3594;&#3656;&#3629;&#3591;&#3607;&#3634;&#3591;</span><b id="lnv">2 &#3594;&#3656;&#3629;&#3591;</b></div>
+        <input type="range" min="1" max="6" step="1" value="2" oninput="document.getElementById('lnv').textContent=this.value+' &#3594;&#3656;&#3629;&#3591;'">
+      </div>
+      <div class="sec">&#3649;&#3626;&#3591;&#3652;&#3615;&#3649;&#3621;&#3632;&#3626;&#3633;&#3597;&#3597;&#3634;&#3603;</div>
+      <div class="trow">
+        <button class="tag sel" onclick="togTag(this)">&#3617;&#3637;&#3652;&#3615;&#3606;&#3609;&#3609;</button>
+        <button class="tag" onclick="togTag(this)">&#3652;&#3617;&#3656;&#3617;&#3637;&#3652;&#3615;&#3606;&#3609;&#3609;</button>
+        <button class="tag sel" onclick="togTag(this)">&#3617;&#3637;&#3626;&#3633;&#3597;&#3597;&#3634;&#3603;&#3652;&#3615;</button>
+        <button class="tag" onclick="togTag(this)">&#3652;&#3617;&#3656;&#3617;&#3637;&#3626;&#3633;&#3597;&#3597;&#3634;&#3603;&#3652;&#3615;</button>
+        <button class="tag" onclick="togTag(this)">&#3617;&#3637;&#3585;&#3621;&#3657;&#3629;&#3591; CCTV</button>
+        <button class="tag" onclick="togTag(this)">&#3617;&#3637;&#3648;&#3585;&#3634;&#3632;&#3585;&#3621;&#3634;&#3591;</button>
+      </div>
+      <div class="sec">&#3588;&#3623;&#3634;&#3617;&#3621;&#3634;&#3604;&#3648;&#3629;&#3637;&#3618;&#3591;</div>
+      <div class="srow">
+        <div class="slrow"><span>&#3588;&#3623;&#3634;&#3617;&#3621;&#3634;&#3604;&#3648;&#3629;&#3637;&#3618;&#3591;</span><b id="slv">0% (&#3619;&#3634;&#3610;&#3648;&#3619;&#3637;&#3618;&#3610;)</b></div>
+        <input type="range" min="-10" max="10" step="1" value="0" oninput="document.getElementById('slv').textContent=this.value+'%'+(+this.value===0?' (&#3619;&#3634;&#3610;&#3648;&#3619;&#3637;&#3618;&#3610;)':+this.value>0?' (&#3586;&#3638;&#3657;&#3609;&#3648;&#3586;&#3634;)':' (&#3621;&#3591;&#3648;&#3586;&#3634;)')">
+      </div>
+    </div>
+    <div class="foot">
+      <button class="bp" onclick="go(6)">&#3606;&#3633;&#3604;&#3652;&#3611; &#8213; &#3618;&#3639;&#3609;&#3618;&#3633;&#3609;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621; &#8594;</button>
+      <button class="bs" onclick="go(4)">&#8592; &#3618;&#3657;&#3629;&#3609;&#3585;&#3621;&#3633;&#3610;</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="screen" id="s6">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge by">CONFIRM</span><span class="htitle">&#3618;&#3639;&#3609;&#3618;&#3633;&#3609;&#3585;&#3656;&#3629;&#3609;&#3626;&#3656;&#3591;</span></div>
+      <div class="loc" style="color:var(--yw);font-size:11px">&#9888;&#65039; &#3652;&#3617;&#3656;&#3626;&#3634;&#3617;&#3634;&#3619;&#3606;&#3649;&#3585;&#3657;&#3652;&#3586;&#3652;&#3604;&#3657;&#3627;&#3621;&#3633;&#3591;&#3592;&#3634;&#3585;&#3626;&#3656;&#3591;&#3649;&#3621;&#3657;&#3623;</div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot act"></div><div class="dot"></div></div>
+      <div class="slbl">&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609; 6/7 &#8213; &#3618;&#3639;&#3609;&#3618;&#3633;&#3609;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;</div>
+    </div>
+    <div class="body">
+      <div class="sec">&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3614;&#3639;&#3657;&#3609;&#3600;&#3634;&#3609;</div>
+      <div class="card" style="padding:10px 14px">
+        <div class="cr_"><span class="ck">&#3626;&#3606;&#3634;&#3609;&#3607;&#3637;&#3656;</span><span class="cv_">&#3626;&#3606;&#3634;&#3609;&#3637;&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614; &#3606;&#3609;&#3609;&#3614;&#3619;&#3632;&#3619;&#3634;&#3617;&#3626;&#3637;&#3656;</span></div>
+        <div class="cr_"><span class="ck">&#3614;&#3636;&#3585;&#3633;&#3604; GPS</span><span class="cv_">13.7563&#176;N 100.5018&#176;E</span></div>
+        <div class="cr_"><span class="ck">&#3623;&#3633;&#3609;&#3607;&#3637;&#3656;/&#3648;&#3623;&#3621;&#3634;</span><span class="cv_">1 &#3617;.&#3588;. 2569 14:01</span></div>
+        <div class="cr_"><span class="ck">&#3619;&#3627;&#3633;&#3626;&#3612;&#3641;&#3657;&#3610;&#3633;&#3609;&#3607;&#3638;&#3585;</span><span class="cv_">USR-4821</span></div>
+      </div>
+      <div class="sec">&#3626;&#3616;&#3634;&#3614;&#3629;&#3634;&#3585;&#3634;&#3624;</div>
+      <div class="card" style="padding:10px 14px">
+        <div class="cr_"><span class="ck">&#3626;&#3616;&#3634;&#3614;&#3629;&#3634;&#3585;&#3634;&#3624;</span><span class="cv_" id="cw">&#127783;&#65039; &#3615;&#3609;&#3605;&#3585;</span></div>
+        <div class="cr_"><span class="ck">&#3629;&#3640;&#3603;&#3627;&#3616;&#3641;&#3617;&#3636;</span><span class="cv_" id="ct">10&#176;C</span></div>
+        <div class="cr_"><span class="ck">&#3588;&#3623;&#3634;&#3617;&#3594;&#3639;&#3657;&#3609; / &#3607;&#3633;&#3624;&#3609;&#3623;&#3636;&#3626;&#3633;&#3618;</span><span class="cv_">78% / 300&#3617;.</span></div>
+        <div class="cr_"><span class="ck">&#3626;&#3616;&#3634;&#3614;&#3606;&#3609;&#3609;</span><span class="cv_">&#3648;&#3611;&#3637;&#3618;&#3585; / &#3617;&#3637;&#3609;&#3657;&#3635;&#3586;&#3633;&#3591;</span></div>
+      </div>
+      <div class="sec">&#3618;&#3634;&#3609;&#3614;&#3634;&#3627;&#3609;&#3632;</div>
+      <div class="card" style="padding:10px 14px">
+        <div class="cr_"><span class="ck">&#3607;&#3632;&#3648;&#3610;&#3637;&#3618;&#3609;</span><span class="cv_">&#3585;&#3607; 1234 &#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;</span></div>
+        <div class="cr_"><span class="ck">&#3611;&#3619;&#3632;&#3648;&#3616;&#3607;</span><span class="cv_">&#3619;&#3606;&#3618;&#3609;&#3605;&#3660;</span></div>
+        <div class="cr_"><span class="ck">&#3592;&#3635;&#3609;&#3623;&#3609;&#3588;&#3633;&#3609;</span><span class="cv_" id="ccar">2 &#3588;&#3633;&#3609;</span></div>
+      </div>
+      <div class="sec">&#3612;&#3641;&#3657;&#3610;&#3634;&#3604;&#3648;&#3592;&#3655;&#3610;</div>
+      <div class="card" style="padding:10px 14px">
+        <div class="cr_"><span class="ck">&#3592;&#3635;&#3609;&#3623;&#3609;</span><span class="cv_" id="cinj">1 &#3588;&#3609;</span></div>
+        <div class="cr_"><span class="ck">&#3629;&#3634;&#3585;&#3634;&#3619;</span><span class="cv_">&#3626;&#3634;&#3627;&#3633;&#3626; (&#3626;&#3656;&#3591; &#3619;&#3614;. &#3649;&#3621;&#3657;&#3623;)</span></div>
+      </div>
+      <div class="sec">&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;&#3606;&#3609;&#3609;</div>
+      <div class="card" style="padding:10px 14px">
+        <div class="cr_"><span class="ck">&#3611;&#3619;&#3632;&#3648;&#3616;&#3607;&#3606;&#3609;&#3609;</span><span class="cv_">&#3606;&#3609;&#3609;&#3607;&#3633;&#3656;&#3623;&#3652;&#3611; / &#3607;&#3634;&#3591;&#3649;&#3618;&#3585;</span></div>
+        <div class="cr_"><span class="ck">&#3588;&#3623;&#3634;&#3617;&#3648;&#3619;&#3655;&#3623;&#3592;&#3635;&#3585;&#3633;&#3604;</span><span class="cv_">60 &#3585;&#3617;./&#3594;&#3617;.</span></div>
+        <div class="cr_"><span class="ck">&#3594;&#3656;&#3629;&#3591;&#3607;&#3634;&#3591;</span><span class="cv_">2 &#3594;&#3656;&#3629;&#3591;/&#3604;&#3657;&#3634;&#3609;</span></div>
+        <div class="cr_"><span class="ck">&#3649;&#3626;&#3591;&#3652;&#3615; / &#3626;&#3633;&#3597;&#3597;&#3634;&#3603;</span><span class="cv_">&#3617;&#3637;&#3652;&#3615;&#3606;&#3609;&#3609; / &#3617;&#3637;&#3626;&#3633;&#3597;&#3597;&#3634;&#3603;&#3652;&#3615;</span></div>
+      </div>
+      <div class="box bw"><span style="font-size:16px;flex-shrink:0">&#128274;</span><span>Timestamp, GPS &#3649;&#3621;&#3632;&#3619;&#3627;&#3633;&#3626;&#3629;&#3640;&#3611;&#3585;&#3619;&#3603;&#3660;&#3592;&#3632;&#3606;&#3641;&#3585;&#3610;&#3633;&#3609;&#3607;&#3638;&#3585;&#3629;&#3633;&#3605;&#3650;&#3609;&#3617;&#3633;&#3605;&#3636; &#3649;&#3621;&#3632;&#3648;&#3585;&#3655;&#3610;&#3652;&#3623;&#3657;&#3651;&#3609; Audit Log</span></div>
+    </div>
+    <div class="foot">
+      <button class="bp bsend" onclick="go(7)">&#128228; &#3626;&#3656;&#3591;&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;</button>
+      <button class="bs" onclick="go(5)">&#8592; &#3585;&#3621;&#3633;&#3610;&#3652;&#3611;&#3649;&#3585;&#3657;&#3652;&#3586;</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="screen" id="s7">
+    <div class="hdr">
+      <div class="hdr-top"><span class="badge bg">&#3626;&#3635;&#3648;&#3619;&#3655;&#3592;</span><span class="htitle">&#3626;&#3656;&#3591;&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;&#3649;&#3621;&#3657;&#3623;</span></div>
+    </div>
+    <div class="prog">
+      <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div></div>
+      <div class="slbl">&#3588;&#3619;&#3610;&#3607;&#3640;&#3585;&#3586;&#3633;&#3657;&#3609;&#3605;&#3629;&#3609;</div>
+    </div>
+    <div class="okwrap">
+      <div class="okico">&#9989;</div>
+      <div style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:8px">&#3626;&#3656;&#3591;&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;&#3626;&#3635;&#3648;&#3619;&#3655;&#3592;&#3649;&#3621;&#3657;&#3623;</div>
+      <div style="font-size:13px;color:var(--mu);line-height:1.7">1 &#3617;.&#3588;. 2569 &#3648;&#3623;&#3621;&#3634; 14:01<br>&#3626;&#3606;&#3634;&#3609;&#3637;&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614; &#3606;&#3609;&#3609;&#3614;&#3619;&#3632;&#3619;&#3634;&#3617;&#3626;&#3637;&#3656;</div>
+      <div class="rno"><small>&#3627;&#3617;&#3634;&#3618;&#3648;&#3621;&#3586;&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;</small><strong>RPT-2569-0101-4821</strong></div>
+      <div class="slist">
+        <div class="sr_"><span>&#3649;&#3592;&#3657;&#3591;&#3648;&#3605;&#3639;&#3629;&#3609;&#3627;&#3609;&#3656;&#3623;&#3618;&#3591;&#3634;&#3609;&#3607;&#3637;&#3656;&#3619;&#3633;&#3610;&#3612;&#3636;&#3604;&#3594;&#3629;&#3610;</span><span class="srok">&#10003; &#3626;&#3635;&#3648;&#3619;&#3655;&#3592;</span></div>
+        <div class="sr_"><span>&#3610;&#3633;&#3609;&#3607;&#3638;&#3585;&#3621;&#3591;&#3615;&#3634;&#3609;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;</span><span class="srok">&#10003; &#3626;&#3635;&#3648;&#3619;&#3655;&#3592;</span></div>
+        <div class="sr_"><span>&#3610;&#3633;&#3609;&#3607;&#3638;&#3585; Audit Log</span><span class="srok">&#10003; &#3626;&#3635;&#3648;&#3619;&#3655;&#3592;</span></div>
+      </div>
+      <button onclick="go(1)" style="margin-top:20px;background:transparent;border:1px solid var(--br2);border-radius:13px;color:var(--mu);padding:14px;font-size:14px;cursor:pointer;width:100%;min-height:50px;font-family:inherit">
+        + &#3626;&#3619;&#3657;&#3634;&#3591;&#3619;&#3634;&#3618;&#3591;&#3634;&#3609;&#3651;&#3627;&#3617;&#3656;
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+var carN=2,injN=1,ocrDone=false;
+function go(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s'+n).classList.add('active');
+  if(n===6){
+    var ws=document.getElementById('wsel'),ti=document.getElementById('tinp');
+    if(ws)document.getElementById('cw').textContent=ws.options[ws.selectedIndex].text;
+    if(ti)document.getElementById('ct').textContent=ti.value+'\u00b0C';
+    document.getElementById('ccar').textContent=carN+' \u0e04\u0e31\u0e19';
+    document.getElementById('cinj').textContent=injN+' \u0e04\u0e19';
+  }
+  window.scrollTo(0,0);
+}
+function togTag(el){el.classList.toggle('sel');}
+function togRoad(el){el.classList.toggle('sel');}
+function togInj(el,t){
+  var p=el.parentElement;
+  p.querySelectorAll('button').forEach(function(b){b.classList.remove('sr','sy');});
+  el.classList.add(t==='r'?'sr':'sy');
+}
+function addPhoto(el){
+  el.innerHTML='<div style="font-size:24px;color:var(--gr)">\u2713</div><div style="font-size:10px;color:var(--gr);margin-top:3px">\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e41\u0e25\u0e49\u0e27</div>';
+  el.classList.add('filled');
+}
+function adjCar(d){
+  carN=Math.max(1,Math.min(10,carN+d));
+  document.getElementById('carcount').textContent=carN;
+}
+function simOCR(){
+  if(ocrDone)return;
+  var h=document.getElementById('ohint');
+  if(h)h.innerHTML='<div style="font-size:26px">\u23f3</div><div style="font-size:11px;color:var(--mu);margin-top:4px">\u0e01\u0e33\u0e25\u0e31\u0e07\u0e2d\u0e48\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25...</div>';
+  setTimeout(function(){
+    ocrDone=true;
+    var f=document.getElementById('oframe');if(f)f.style.display='none';
+    var r=document.getElementById('ores');if(r)r.style.display='block';
+  },1800);
+}
+function addPerson(){
+  injN++;
+  var list=document.getElementById('injlist'),div=document.createElement('div');
+  div.className='icard';
+  div.innerHTML='<div class="ihdr"><div class="inum">'+injN+'</div><span style="font-size:13px;color:var(--tx);font-weight:700">\u0e1c\u0e39\u0e49\u0e1a\u0e32\u0e14\u0e40\u0e08\u0e47\u0e1a #'+injN+'</span></div>'
+    +'<div class="sec" style="margin-bottom:7px">\u0e23\u0e30\u0e14\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e1a\u0e32\u0e14\u0e40\u0e08\u0e47\u0e1a</div>'
+    +'<div class="igrid">'
+    +'<button class="ibtn" onclick="togInj(this,\'r\')">\u0e2a\u0e32\u0e2b\u0e31\u0e2a</button>'
+    +'<button class="ibtn" onclick="togInj(this,\'r\')">\u0e1b\u0e32\u0e19\u0e01\u0e25\u0e32\u0e07</button>'
+    +'<button class="ibtn" onclick="togInj(this,\'r\')">\u0e40\u0e25\u0e47\u0e01\u0e19\u0e49\u0e2d\u0e22</button>'
+    +'<button class="ibtn" onclick="togInj(this,\'r\')">\u0e44\u0e21\u0e48\u0e17\u0e23\u0e32\u0e1a</button>'
+    +'</div>'
+    +'<div class="sec" style="margin-bottom:7px">\u0e01\u0e32\u0e23\u0e2a\u0e48\u0e07\u0e15\u0e31\u0e27\u0e17\u0e32\u0e07\u0e01\u0e32\u0e23\u0e41\u0e1e\u0e17\u0e22\u0e4c</div>'
+    +'<div style="display:flex;gap:7px">'
+    +'<button class="ibtn" style="flex:1" onclick="togInj(this,\'y\')">\u0e2a\u0e48\u0e07 \u0e23\u0e1e. \u0e41\u0e25\u0e49\u0e27</button>'
+    +'<button class="ibtn" style="flex:1" onclick="togInj(this,\'y\')">\u0e40\u0e14\u0e34\u0e19\u0e44\u0e14\u0e49\u0e40\u0e2d\u0e07</button>'
+    +'<button class="ibtn" style="flex:1" onclick="togInj(this,\'y\')">\u0e44\u0e21\u0e48\u0e17\u0e23\u0e32\u0e1a</button>'
+    +'</div>';
+  list.appendChild(div);
+}
+function chgW(){
+  var ws=document.getElementById('wsel');
+  var m={'\u0e1d\u0e19\u0e15\u0e01':'\ud83c\udf27\ufe0f','\u0e41\u0e14\u0e14\u0e08\u0e31\u0e14':'\u2600\ufe0f','\u0e21\u0e35\u0e40\u0e21\u0e34\u0e19':'\u2601\ufe0f','\u0e2b\u0e34\u0e21\u0e30':'\u2744\ufe0f','\u0e2b\u0e21\u0e2d\u0e01':'\ud83c\udf2b\ufe0f','\u0e25\u0e21\u0e41\u0e23\u0e07':'\ud83d\udca8'};
+  document.getElementById('wlbl').textContent=ws.value;
+  document.getElementById('wico').textContent=m[ws.value]||'\ud83c\udf27\ufe0f';
+}
+function chgT(){
+  document.getElementById('wtmp').textContent=document.getElementById('tinp').value+'\u00b0C';
+}
+</script>
+</body>
+</html>
